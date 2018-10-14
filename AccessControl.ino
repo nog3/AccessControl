@@ -491,12 +491,21 @@ void setup() {
     ESP.reset();
   });
   http.on("/bump", []() {
-    http.send(200, "text/plain", "Bumping door.");
-    log("[DEBUG] Bumped lock.");
-    pulseContact();
+    if (deviceType == "door") {
+      http.send(200, "text/plain", "Bumping door.");
+      log("[DEBUG] Bumped lock.");
+      pulseContact();
+    }
   });
   http.on("/checkin", []() {
     idleHeartBeatFlag();
+  });
+  http.on("/end", []() {
+    if (deviceType == "interlock") {
+      contact = 0;
+      digitalWrite(switchPin, LOW);
+      statusLight('b');
+    }
   });
   http.begin();
   log("[SETUP] HTTP server started");
